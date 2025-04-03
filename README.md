@@ -37,7 +37,7 @@ A powerful Gradio interface built on top of the Kokoro TTS (Text-to-Speech) mode
 1. Clone the repository:
    ```bash
    git clone https://github.com/LostInMatrix/kokoro-tts-matrix
-   cd kokoro-matrix
+   cd kokoro-tts-matrix
    ```
 
 2. Run with Docker Compose:
