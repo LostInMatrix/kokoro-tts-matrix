@@ -2,7 +2,7 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![CUDA Compatible](https://img.shields.io/badge/CUDA-compatible-green.svg)](https://developer.nvidia.com/cuda-toolkit)
-[![License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-orange)](LICENSE)
 
 A powerful Gradio interface built on top of the Kokoro TTS (Text-to-Speech) model with advanced voice customization, blending, and audio processing capabilities.
 
