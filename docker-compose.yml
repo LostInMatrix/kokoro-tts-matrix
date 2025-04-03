@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app:cached
+    ports:
+      - "7860:7860"
+    environment:
+      - PYTHONUNBUFFERED=1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

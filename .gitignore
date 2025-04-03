@@ -1,0 +1,9 @@
+/docker
+.idea
+/_notes
+audio_debug.log
+gradio_debug.log
+src/data/voices
+temp_downloads
+user_voices
+outputs
