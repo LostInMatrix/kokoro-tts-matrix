@@ -7,6 +7,7 @@ import base64
 from datetime import datetime
 import re
 from .goldilocks import GoldilocksChunker
+from .pronunciation_dictionary import PronunciationDictionary
 
 _goldilocks_chunker = None
 
@@ -30,6 +31,17 @@ def extract_text_from_epub(epub_file: str) -> str:
 
 import re
 import logging
+
+_pronunciation_dict = None
+
+def get_pronunciation_dictionary():
+    global _pronunciation_dict
+    if _pronunciation_dict is None:
+        _pronunciation_dict = PronunciationDictionary()
+    return _pronunciation_dict
+
+def apply_pronunciation_dictionary(text):
+    return get_pronunciation_dictionary().apply_pronunciations(text)
 
 def convert_all_caps(text: str) -> str:
     """Convert ALL CAPS words to Title Case for more natural TTS reading."""
@@ -78,6 +90,8 @@ def chunk_text(text: str, chunk_size: int = 2000, use_goldilocks: bool = True) -
     if not text or not text.strip():
         logging.debug("chunk_text: Empty text, returning []")
         return []
+
+    text = apply_pronunciation_dictionary(text)
 
     if use_goldilocks:
         if _goldilocks_chunker is None:

@@ -5,6 +5,7 @@ import soundfile as sf
 from typing import Dict, Optional, Tuple, Union
 from kokoro_matrix.text_processing import extract_text_from_epub
 from kokoro_matrix.pipeline import initialize_pipeline
+from kokoro_matrix.pronunciation_dictionary import DEFAULT_PRONUNCIATIONS, PronunciationDictionary
 from kokoro_matrix.audio_processing import (
     convert_text_to_audio,
     AudioProcessor,
@@ -74,6 +75,42 @@ VOICES_BY_LANGUAGE = {
     "Italian": ["if_sara", "im_nicola"],
     "Brazilian Portuguese": ["pf_dora", "pm_alex", "pm_santa"]
 }
+
+def load_pronunciation_dictionary():
+    pron_dict = PronunciationDictionary()
+    is_enabled = pron_dict.enabled
+    words_list = [[word, phoneme] for word, phoneme in pron_dict.pronunciations.items()]
+    return is_enabled, words_list
+
+def save_pronunciation_enabled(enabled):
+    pron_dict = PronunciationDictionary()
+    pron_dict.set_enabled(enabled)
+    return "Pronunciation dictionary " + ("enabled" if enabled else "disabled")
+
+def add_pronunciation_word(word, phoneme):
+    if not word or not phoneme:
+        return "Word and phonetic pronunciation are required", get_pronunciation_words(), [[]]
+
+    pron_dict = PronunciationDictionary()
+    pron_dict.add_pronunciation(word, phoneme)
+    words_list = [[word, phoneme] for word, phoneme in pron_dict.pronunciations.items()]
+    return f"Added pronunciation for '{word}'", get_pronunciation_words(), words_list
+
+def delete_pronunciation_word(word):
+    if not word:
+        return "Please select a word to delete", get_pronunciation_words(), [[]]
+
+    pron_dict = PronunciationDictionary()
+    if word in pron_dict.pronunciations:
+        pron_dict.remove_pronunciation(word)
+        words_list = [[word, phoneme] for word, phoneme in pron_dict.pronunciations.items()]
+        return f"Deleted pronunciation for '{word}'", get_pronunciation_words(), words_list
+    else:
+        return f"Word '{word}' not found in pronunciation dictionary", get_pronunciation_words(), [[word, phoneme] for word, phoneme in pron_dict.pronunciations.items()]
+
+def get_pronunciation_words():
+    pron_dict = PronunciationDictionary()
+    return list(pron_dict.pronunciations.keys())
 
 def clear_logs():
     """Clear both log files."""
@@ -989,6 +1026,33 @@ def launch_gradio():
                             value=True,
                             info="Convert words in ALL CAPS to Title Case for more natural reading"
                         )
+                with gr.Accordion("Pronunciation Dictionary", open=False):
+                    gr.Markdown("### Custom Word Pronunciations")
+                    pron_enabled = gr.Checkbox(
+                        label="Enable Custom Pronunciations",
+                        value=True,
+                        info="Automatically apply phonetic pronunciations to words"
+                    )
+
+                    pronunciation_table = gr.Dataframe(
+                        headers=["Word", "Phonetic Pronunciation"],
+                        datatype=["str", "str"],
+                        label="Pronunciation Dictionary",
+                        value=[[word, phoneme] for word, phoneme in DEFAULT_PRONUNCIATIONS.items()]
+                    )
+
+                    with gr.Row():
+                        new_word = gr.Textbox(label="Word", placeholder="Enter word")
+                        new_phoneme = gr.Textbox(label="Phonetic Pronunciation", placeholder="/fəˈnɛtɪk/")
+                        add_pron_btn = gr.Button("Add Word", variant="primary")
+
+                    with gr.Row():
+                        delete_word = gr.Dropdown(
+                            label="Select Word to Delete",
+                            choices=[word for word in DEFAULT_PRONUNCIATIONS.keys()],
+                            value=None
+                        )
+                        delete_pron_btn = gr.Button("Delete Word", variant="secondary")
 
             with gr.Tab("Blended Voices"):
                 gr.Markdown("""
@@ -1396,6 +1460,34 @@ def launch_gradio():
             fn=generate_phoneme_example,
             inputs=[phoneme_input, example_voice],
             outputs=[phoneme_audio]
+        )
+
+        iface.load(
+            fn=lambda: (
+                PronunciationDictionary().enabled,
+                get_pronunciation_words(),
+                [[word, phoneme] for word, phoneme in PronunciationDictionary().pronunciations.items()]
+            ),
+            inputs=[],
+            outputs=[pron_enabled, delete_word, pronunciation_table]
+        )
+
+        pron_enabled.change(
+            fn=save_pronunciation_enabled,
+            inputs=[pron_enabled],
+            outputs=[gr.Textbox(visible=False)]
+        )
+
+        add_pron_btn.click(
+            fn=add_pronunciation_word,
+            inputs=[new_word, new_phoneme],
+            outputs=[gr.Textbox(visible=False), delete_word, pronunciation_table]
+        )
+
+        delete_pron_btn.click(
+            fn=delete_pronunciation_word,
+            inputs=[delete_word],
+            outputs=[gr.Textbox(visible=False), delete_word, pronunciation_table]
         )
 
         convert_btn.click(
