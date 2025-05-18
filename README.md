@@ -8,12 +8,7 @@ A powerful Gradio interface built on top of the Kokoro TTS (Text-to-Speech) mode
 
 ## Audio Example
 
-Listen to a text-to-speech rendering of an excerpt from Martha Wells' "All Systems Red" (Murderbot Diaries):
-
-<audio controls>
-  <source src="https://raw.githubusercontent.com/LostInMatrix/kokoro-tts-matrix/master/src/kokoro_matrix/assets/examples/martha-wells-murderbot.mp3" type="audio/mpeg">
-  Your browser does not support the audio element.
-</audio>
+🔊 [Listen to Murderbot TTS excerpt](https://github.com/LostInMatrix/kokoro-tts-matrix/blob/master/src/kokoro_matrix/assets/examples/martha-wells-murderbot.mp3)
 
 ![Kokoro Matrix Demo](src/kokoro_matrix/assets/images/demo.png)
 ![Kokoro Matrix Demo](src/kokoro_matrix/assets/images/settings.png)
